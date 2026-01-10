@@ -21,6 +21,9 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
 
+  // Base API URL from environment variable
+  const API_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
       navigate("/");
@@ -31,7 +34,7 @@ export default function AdminDashboard() {
       try {
         setLoading(true);
         const { data } = await axios.get(
-          "http://localhost:5000/api/admin/stats",
+          `${API_URL}/api/admin/stats`,
           {
             headers: { Authorization: `Bearer ${userInfo.token}` },
           }
@@ -47,7 +50,7 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, [userInfo, navigate]);
+  }, [userInfo, navigate, API_URL]);
 
   if (loading) {
     return (
