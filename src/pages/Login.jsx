@@ -6,6 +6,8 @@ import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { loginSuccess } from '../redux/slices/userSlice';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export default function Login() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -24,7 +26,7 @@ export default function Login() {
       setLoading(true);
       
       const { data } = await axios.post(
-        'http://localhost:5000/api/auth/login',
+        `${API_URL}/auth/login`,
         {
           email: formData.email,
           password: formData.password
