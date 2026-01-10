@@ -2,8 +2,7 @@ import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-import API from "../services/api";
-import { ArrowLeft, CheckCircle, XCircle, Edit2, Eye } from "lucide-react";
+import { ArrowLeft, CheckCircle, XCircle, Eye } from "lucide-react";
 import formatCurrency from "../utils/formatCurrency";
 
 export default function AdminOrders() {
@@ -13,6 +12,9 @@ export default function AdminOrders() {
 
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
+
+  // Base API URL from environment variable
+  const API_URL = process.env.REACT_APP_API_URL;
 
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
@@ -26,7 +28,9 @@ export default function AdminOrders() {
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await API.get("/admin/orders");
+      const { data } = await axios.get(`${API_URL}/api/admin/orders`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      });
       setOrders(data);
       setError(null);
     } catch (err) {
@@ -39,7 +43,11 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId, isPaid, isDelivered) => {
     try {
-      await API.put(`/admin/orders/${orderId}`, { isPaid, isDelivered });
+      await axios.put(
+        `${API_URL}/api/admin/orders/${orderId}`,
+        { isPaid, isDelivered },
+        { headers: { Authorization: `Bearer ${userInfo.token}` } }
+      );
       fetchOrders(); // Refresh orders
       alert("Order status updated successfully!");
     } catch (err) {
@@ -89,40 +97,46 @@ export default function AdminOrders() {
           <table className="w-full">
             <thead className="bg-gray-50 border-b">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Order ID</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Customer</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Total</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Paid</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Delivered</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Order ID
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Customer
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Date
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Total
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Paid
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Delivered
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">
+                  Actions
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {orders.map((order) => (
                 <tr key={order._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm">
-                    #{order._id.slice(-8)}
-                  </td>
+                  <td className="px-6 py-4 text-sm">#{order._id.slice(-8)}</td>
                   <td className="px-6 py-4">
                     <div>
                       <p className="font-medium">{order.user?.name || "N/A"}</p>
                       <p className="text-sm text-gray-600">{order.user?.email || "N/A"}</p>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm">
-                    {formatDate(order.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 font-medium">
-                    {formatCurrency(order.totalPrice)}
-                  </td>
+                  <td className="px-6 py-4 text-sm">{formatDate(order.createdAt)}</td>
+                  <td className="px-6 py-4 font-medium">{formatCurrency(order.totalPrice)}</td>
                   <td className="px-6 py-4">
                     <button
                       onClick={() => updateOrderStatus(order._id, !order.isPaid, order.isDelivered)}
                       className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
-                        order.isPaid
-                          ? "bg-green-100 text-green-700"
-                          : "bg-red-100 text-red-700"
+                        order.isPaid ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                       }`}
                     >
                       {order.isPaid ? (
@@ -140,9 +154,7 @@ export default function AdminOrders() {
                     <button
                       onClick={() => updateOrderStatus(order._id, order.isPaid, !order.isDelivered)}
                       className={`flex items-center gap-1 px-3 py-1 rounded text-sm ${
-                        order.isDelivered
-                          ? "bg-green-100 text-green-700"
-                          : "bg-yellow-100 text-yellow-700"
+                        order.isDelivered ? "bg-green-100 text-green-700" : "bg-yellow-100 text-yellow-700"
                       }`}
                     >
                       {order.isDelivered ? (
