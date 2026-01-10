@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
 import axios from 'axios';
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export default function Register() {
   const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
@@ -28,7 +30,7 @@ export default function Register() {
       setLoading(true);
       // Send POST request to backend
       const { data } = await axios.post(
-        'http://localhost:5000/api/auth/register',
+        `${API_URL}/auth/register`,
         {
           name: formData.name,
           email: formData.email,
