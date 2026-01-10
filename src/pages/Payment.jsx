@@ -5,6 +5,8 @@ import axios from "axios";
 import { clearCart } from "../redux/slices/cartSlice";
 import { CreditCard, Loader } from "lucide-react";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export default function Payment() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -72,7 +74,7 @@ export default function Payment() {
 
         // Create Razorpay order
         const { data: orderData } = await axios.post(
-          "http://localhost:5000/api/payment/razorpay/create-order",
+          `${API_URL}/payment/razorpay/create-order`,
           {
             amount: total * 100, // Convert to paise
           },
@@ -142,7 +144,7 @@ export default function Payment() {
       };
 
       const { data } = await axios.post(
-        "http://localhost:5000/api/orders",
+        `${API_URL}/orders`,
         orderData,
         {
           headers: { Authorization: `Bearer ${userInfo.token}` },
