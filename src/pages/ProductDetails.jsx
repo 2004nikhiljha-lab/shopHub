@@ -6,6 +6,8 @@ import { addToCart } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 import { ShoppingCart } from "lucide-react";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+
 export default function ProductDetails() {
   const { id } = useParams(); // product id from URL
   const dispatch = useDispatch();
@@ -18,7 +20,7 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`/api/products/${id}`);
+        const { data } = await axios.get(`${API_URL}/products/${id}`);
         setProduct(data);
         setLoading(false);
       } catch (err) {
@@ -26,7 +28,6 @@ export default function ProductDetails() {
         setLoading(false);
       }
     };
-
     fetchProduct();
   }, [id]);
 
@@ -53,7 +54,6 @@ export default function ProductDetails() {
   return (
     <div className="max-w-7xl mx-auto px-4 py-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-
         {/* Image */}
         <img
           src={product.image}
@@ -64,9 +64,7 @@ export default function ProductDetails() {
         {/* Details */}
         <div>
           <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-
           <p className="text-gray-600 mb-4">{product.description}</p>
-
           <p className="text-2xl font-bold text-blue-600 mb-4">
             {formatCurrency(product.price)}
           </p>
