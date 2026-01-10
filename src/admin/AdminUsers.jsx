@@ -12,6 +12,9 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
 
+  // Base API URL from environment variable
+  const API_URL = process.env.REACT_APP_API_URL;
+
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
       navigate("/");
@@ -24,12 +27,9 @@ export default function AdminUsers() {
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(
-        "http://localhost:5000/api/admin/users",
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
-      );
+      const { data } = await axios.get(`${API_URL}/api/admin/users`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      });
       setUsers(data);
       setError(null);
     } catch (err) {
@@ -46,12 +46,9 @@ export default function AdminUsers() {
     }
 
     try {
-      await axios.delete(
-        `http://localhost:5000/api/admin/users/${userId}`,
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
-      );
+      await axios.delete(`${API_URL}/api/admin/users/${userId}`, {
+        headers: { Authorization: `Bearer ${userInfo.token}` },
+      });
       fetchUsers(); // Refresh users
       alert("User deleted successfully!");
     } catch (err) {
@@ -112,9 +109,7 @@ export default function AdminUsers() {
             <tbody className="divide-y">
               {users.map((user) => (
                 <tr key={user._id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 text-sm font-mono">
-                    #{user._id.slice(-8)}
-                  </td>
+                  <td className="px-6 py-4 text-sm font-mono">#{user._id.slice(-8)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-2">
                       <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
@@ -125,9 +120,7 @@ export default function AdminUsers() {
                       <span className="font-medium">{user.name}</span>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-gray-600">
-                    {user.email}
-                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-600">{user.email}</td>
                   <td className="px-6 py-4">
                     {user.isAdmin ? (
                       <span className="flex items-center gap-1 text-purple-600">
@@ -141,9 +134,7 @@ export default function AdminUsers() {
                       </span>
                     )}
                   </td>
-                  <td className="px-6 py-4 text-sm">
-                    {formatDate(user.createdAt)}
-                  </td>
+                  <td className="px-6 py-4 text-sm">{formatDate(user.createdAt)}</td>
                   <td className="px-6 py-4">
                     {user._id !== userInfo._id && (
                       <button
