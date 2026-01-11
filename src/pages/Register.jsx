@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
-import axios from 'axios';
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
+import API from '../api'; // ✅ Import the configured API instance
+import { loginSuccess } from '../redux/slices/userSlice'; // ✅ Import Redux action
 
 export default function Register() {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [formData, setFormData] = useState({
@@ -28,29 +30,22 @@ export default function Register() {
 
     try {
       setLoading(true);
-      // Send POST request to backend
-      const { data } = await axios.post(
-        `${API_URL}/auth/register`,
-        {
-          name: formData.name,
-          email: formData.email,
-          phone: formData.phone,
-          password: formData.password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      
+      // ✅ Use API instance - no need for manual URL or headers
+      const { data } = await API.post('/auth/register', {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        password: formData.password
+      });
 
-      // Save token to localStorage
-      localStorage.setItem('userInfo', JSON.stringify(data));
+      // ✅ Dispatch to Redux to update state (same as login)
+      dispatch(loginSuccess(data));
 
       alert('Registration successful!');
-      navigate('/'); // Redirect to home or dashboard
+      navigate('/'); // Redirect to home
     } catch (error) {
-      console.error('Registration error:', error.response?.data || error.message);
+      console.error('Registration error:', error);
       alert(error.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
@@ -76,7 +71,7 @@ export default function Register() {
           </div>
 
           {/* Registration Form */}
-          <div className="space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
             {/* Name Field */}
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Full Name</label>
@@ -181,11 +176,11 @@ export default function Register() {
               <input type="checkbox" className="mt-1 rounded border-gray-300 text-purple-600 focus:ring-purple-500" required />
               <span className="ml-2 text-sm text-gray-600">
                 I agree to the{' '}
-                <button className="text-purple-600 hover:text-purple-700 font-medium">
+                <button type="button" className="text-purple-600 hover:text-purple-700 font-medium">
                   Terms of Service
                 </button>{' '}
                 and{' '}
-                <button className="text-purple-600 hover:text-purple-700 font-medium">
+                <button type="button" className="text-purple-600 hover:text-purple-700 font-medium">
                   Privacy Policy
                 </button>
               </span>
@@ -193,7 +188,7 @@ export default function Register() {
 
             {/* Register Button */}
             <button
-              onClick={handleSubmit}
+              type="submit"
               disabled={loading}
               className={`w-full py-3 rounded-lg font-semibold text-white transition ${
                 loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
@@ -201,7 +196,7 @@ export default function Register() {
             >
               {loading ? 'Registering...' : 'Create Account'}
             </button>
-          </div>
+          </form>
 
           {/* Sign In Link */}
           <p className="mt-6 text-center text-sm text-gray-600">
