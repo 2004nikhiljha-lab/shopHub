@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import API from '../api'; // ✅ Import the configured API instance
+import API from '../services/api'; 
 import { loginSuccess } from '../redux/slices/userSlice';
 
 export default function Login() {
