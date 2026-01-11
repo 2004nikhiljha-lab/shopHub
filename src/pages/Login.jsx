@@ -17,11 +17,22 @@ export default function Login() {
   });
   const [loading, setLoading] = useState(false);
 
+  // 🔍 DEBUG: Log API configuration when component loads
+  console.log('=== API Configuration Debug ===');
+  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
+  console.log('API baseURL:', API.defaults.baseURL);
+  console.log('================================');
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       setLoading(true);
+      
+      // 🔍 DEBUG: Log the full URL before making the request
+      const fullURL = `${API.defaults.baseURL}/auth/login`;
+      console.log('🚀 Attempting login to:', fullURL);
+      console.log('📧 Email:', formData.email);
       
       // ✅ Use API instance - no need for manual URL or headers
       const { data } = await API.post('/auth/login', {
@@ -29,13 +40,21 @@ export default function Login() {
         password: formData.password
       });
 
+      console.log('✅ Login successful!', data);
+
       // ✅ Dispatch to Redux to update state
       dispatch(loginSuccess(data));
 
       alert('Login successful!');
       navigate('/'); // Redirect to home
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('❌ Login error:', error);
+      console.error('Error response:', error.response);
+      console.error('Error status:', error.response?.status);
+      console.error('Error data:', error.response?.data);
+      console.error('Request URL:', error.config?.url);
+      console.error('Full request config:', error.config);
+      
       const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
       alert(errorMessage);
     } finally {
