@@ -1,12 +1,10 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import { addToCart } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 import { ShoppingCart } from "lucide-react";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export default function ProductDetails() {
   const { id } = useParams(); // product id from URL
@@ -20,14 +18,17 @@ export default function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const { data } = await axios.get(`${API_URL}/products/${id}`);
+        // ✅ Use API instance - fixed syntax error
+        const { data } = await API.get(`/products/${id}`);
         setProduct(data);
         setLoading(false);
       } catch (err) {
+        console.error("Error fetching product:", err);
         setError("Product not found");
         setLoading(false);
       }
     };
+
     fetchProduct();
   }, [id]);
 
@@ -41,14 +42,28 @@ export default function ProductDetails() {
         quantity: qty,
       })
     );
+    alert("Added to cart!");
   };
 
   if (loading) {
-    return <div className="text-center py-20">Loading...</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading product...</p>
+        </div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-center py-20 text-red-500">{error}</div>;
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500 text-xl">{error}</p>
+        </div>
+      </div>
+    );
   }
 
   return (
