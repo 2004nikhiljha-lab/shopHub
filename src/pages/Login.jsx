@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, AlertCircle } from 'lucide-react';
 import API from '../services/api'; 
 import { loginSuccess } from '../redux/slices/userSlice';
 
@@ -16,47 +16,41 @@ export default function Login() {
     password: ''
   });
   const [loading, setLoading] = useState(false);
-
-  // 🔍 DEBUG: Log API configuration when component loads
-  console.log('=== API Configuration Debug ===');
-  console.log('VITE_API_URL:', import.meta.env.VITE_API_URL);
-  console.log('API baseURL:', API.defaults.baseURL);
-  console.log('================================');
+  const [error, setError] = useState(''); // Add error state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
 
     try {
       setLoading(true);
       
-      // 🔍 DEBUG: Log the full URL before making the request
-      const fullURL = `${API.defaults.baseURL}/auth/login`;
-      console.log('🚀 Attempting login to:', fullURL);
-      console.log('📧 Email:', formData.email);
-      
-      // ✅ Use API instance - no need for manual URL or headers
       const { data } = await API.post('/auth/login', {
         email: formData.email,
         password: formData.password
       });
 
-      console.log('✅ Login successful!', data);
-
-      // ✅ Dispatch to Redux to update state
+      // Dispatch to Redux to update state
       dispatch(loginSuccess(data));
 
-      alert('Login successful!');
-      navigate('/'); // Redirect to home
+      // Store in localStorage for persistence
+      localStorage.setItem('userInfo', JSON.stringify(data));
+
+      // Redirect to home
+      navigate('/');
     } catch (error) {
-      console.error('❌ Login error:', error);
-      console.error('Error response:', error.response);
-      console.error('Error status:', error.response?.status);
-      console.error('Error data:', error.response?.data);
-      console.error('Request URL:', error.config?.url);
-      console.error('Full request config:', error.config);
+      console.error('Login error:', error);
       
-      const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
-      alert(errorMessage);
+      // Set user-friendly error message
+      if (error.response?.status === 401) {
+        setError('Invalid email or password. Please try again.');
+      } else if (error.response?.status === 404) {
+        setError('Login service unavailable. Please try again later.');
+      } else if (error.message === 'Network Error') {
+        setError('Unable to connect to server. Please check your internet connection.');
+      } else {
+        setError(error.response?.data?.message || 'Login failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -67,6 +61,8 @@ export default function Login() {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) setError('');
   };
 
   return (
@@ -79,6 +75,17 @@ export default function Login() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h1>
             <p className="text-gray-600">Sign in to your account to continue</p>
           </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="text-sm text-red-800 font-medium">Login Failed</p>
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+              </div>
+            </div>
+          )}
 
           {/* Login Form */}
           <form onSubmit={handleSubmit} className="space-y-6">
