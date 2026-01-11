@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { useParams } from "react-router-dom";
-import API from "../api"; // ✅ Import the configured API instance
+import API from '../services/api';
 import { addToCart } from "../redux/slices/cartSlice";
 import formatCurrency from "../utils/formatCurrency";
 import { ShoppingCart } from "lucide-react";
