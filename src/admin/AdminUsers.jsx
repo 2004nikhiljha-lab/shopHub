@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import { ArrowLeft, Trash2, Shield, User } from "lucide-react";
 
 export default function AdminUsers() {
@@ -12,9 +12,6 @@ export default function AdminUsers() {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
 
-  // Base API URL from environment variable
-  const API_URL = process.env.REACT_APP_API_URL;
-
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
       navigate("/");
@@ -22,14 +19,14 @@ export default function AdminUsers() {
     }
 
     fetchUsers();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo, navigate]);
 
   const fetchUsers = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/api/admin/users`, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
-      });
+      // ✅ Use API instance - no need for manual URL construction or auth headers
+      const { data } = await API.get("/admin/users");
       setUsers(data);
       setError(null);
     } catch (err) {
@@ -46,9 +43,8 @@ export default function AdminUsers() {
     }
 
     try {
-      await axios.delete(`${API_URL}/api/admin/users/${userId}`, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
-      });
+      // ✅ Use API instance
+      await API.delete(`/admin/users/${userId}`);
       fetchUsers(); // Refresh users
       alert("User deleted successfully!");
     } catch (err) {
