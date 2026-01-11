@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import API from "../api"; // ✅ Import the configured API instance
+import API from '../services/api';
 import { ArrowLeft, Trash2, Shield, User } from "lucide-react";
 
 export default function AdminUsers() {
