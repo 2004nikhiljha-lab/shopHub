@@ -3,10 +3,8 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
-import axios from 'axios';
+import API from '../api'; // ✅ Import the configured API instance
 import { loginSuccess } from '../redux/slices/userSlice';
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -25,26 +23,19 @@ export default function Login() {
     try {
       setLoading(true);
       
-      const { data } = await axios.post(
-        `${API_URL}/auth/login`,
-        {
-          email: formData.email,
-          password: formData.password
-        },
-        {
-          headers: {
-            'Content-Type': 'application/json'
-          }
-        }
-      );
+      // ✅ Use API instance - no need for manual URL or headers
+      const { data } = await API.post('/auth/login', {
+        email: formData.email,
+        password: formData.password
+      });
 
-      // ✅ IMPORTANT: Dispatch to Redux to update state
+      // ✅ Dispatch to Redux to update state
       dispatch(loginSuccess(data));
 
       alert('Login successful!');
       navigate('/'); // Redirect to home
     } catch (error) {
-      console.error('Login error:', error.response?.data || error.message);
+      console.error('Login error:', error);
       const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
       alert(errorMessage);
     } finally {
