@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import API from "../api"; // ✅ Import the configured API instance
+import API from '../services/api';
 import { ArrowLeft, CheckCircle, XCircle, Eye } from "lucide-react";
 import formatCurrency from "../utils/formatCurrency";
 
