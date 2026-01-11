@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import { ArrowLeft, CheckCircle, XCircle, Eye } from "lucide-react";
 import formatCurrency from "../utils/formatCurrency";
 
@@ -13,9 +13,6 @@ export default function AdminOrders() {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
 
-  // Base API URL from environment variable
-  const API_URL = process.env.REACT_APP_API_URL;
-
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
       navigate("/");
@@ -23,14 +20,14 @@ export default function AdminOrders() {
     }
 
     fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userInfo, navigate]);
 
   const fetchOrders = async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`${API_URL}/api/admin/orders`, {
-        headers: { Authorization: `Bearer ${userInfo.token}` },
-      });
+      // ✅ Use API instance - no need for manual URL construction or auth headers
+      const { data } = await API.get("/admin/orders");
       setOrders(data);
       setError(null);
     } catch (err) {
@@ -43,11 +40,8 @@ export default function AdminOrders() {
 
   const updateOrderStatus = async (orderId, isPaid, isDelivered) => {
     try {
-      await axios.put(
-        `${API_URL}/api/admin/orders/${orderId}`,
-        { isPaid, isDelivered },
-        { headers: { Authorization: `Bearer ${userInfo.token}` } }
-      );
+      // ✅ Use API instance
+      await API.put(`/admin/orders/${orderId}`, { isPaid, isDelivered });
       fetchOrders(); // Refresh orders
       alert("Order status updated successfully!");
     } catch (err) {
