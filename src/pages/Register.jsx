@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
-import { Mail, Lock, User, Eye, EyeOff, Phone } from 'lucide-react';
+import { Mail, Lock, User, Eye, EyeOff, Phone, AlertCircle } from 'lucide-react';
 import API from '../services/api';
-import { loginSuccess } from '../redux/slices/userSlice'; // ✅ Import Redux action
+import { loginSuccess } from '../redux/slices/userSlice';
+import Loader from '../components/Loader';
 
 export default function Register() {
   const navigate = useNavigate();
@@ -19,19 +20,27 @@ export default function Register() {
     confirmPassword: ''
   });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(''); // Add error state
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(''); // Clear previous errors
 
+    // Validate passwords match
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match!');
+      setError('Passwords do not match!');
+      return;
+    }
+
+    // Validate password strength
+    if (formData.password.length < 6) {
+      setError('Password must be at least 6 characters long');
       return;
     }
 
     try {
       setLoading(true);
       
-      // ✅ Use API instance - no need for manual URL or headers
       const { data } = await API.post('/auth/register', {
         name: formData.name,
         email: formData.email,
@@ -39,14 +48,23 @@ export default function Register() {
         password: formData.password
       });
 
-      // ✅ Dispatch to Redux to update state (same as login)
+      // Dispatch to Redux and save to localStorage
       dispatch(loginSuccess(data));
+      localStorage.setItem('userInfo', JSON.stringify(data));
 
-      alert('Registration successful!');
-      navigate('/'); // Redirect to home
+      // Redirect to home
+      navigate('/');
     } catch (error) {
       console.error('Registration error:', error);
-      alert(error.response?.data?.message || 'Registration failed. Please try again.');
+      
+      // Handle specific error cases
+      if (error.response?.status === 400) {
+        setError(error.response?.data?.message || 'User already exists with this email');
+      } else if (error.message === 'Network Error') {
+        setError('Unable to connect to server. Please check your internet connection.');
+      } else {
+        setError(error.response?.data?.message || 'Registration failed. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -57,7 +75,14 @@ export default function Register() {
       ...formData,
       [e.target.name]: e.target.value
     });
+    // Clear error when user starts typing
+    if (error) setError('');
   };
+
+  // Show full-screen loader while registering
+  if (loading) {
+    return <Loader fullScreen text="Creating your account..." size="large" />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-100 flex items-center justify-center py-12 px-4">
@@ -69,6 +94,17 @@ export default function Register() {
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Account</h1>
             <p className="text-gray-600">Join us and start shopping today</p>
           </div>
+
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+              <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
+              <div>
+                <p className="text-sm text-red-800 font-medium">Registration Failed</p>
+                <p className="text-sm text-red-600 mt-1">{error}</p>
+              </div>
+            </div>
+          )}
 
           {/* Registration Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
@@ -85,6 +121,7 @@ export default function Register() {
                   placeholder="Enter your full name"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
+                  minLength={2}
                 />
               </div>
             </div>
@@ -119,6 +156,7 @@ export default function Register() {
                   placeholder="Enter your phone number"
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
+                  minLength={10}
                 />
               </div>
             </div>
@@ -133,9 +171,10 @@ export default function Register() {
                   name="password"
                   value={formData.password}
                   onChange={handleChange}
-                  placeholder="Create a password"
+                  placeholder="Create a password (min. 6 characters)"
                   className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
                   required
+                  minLength={6}
                 />
                 <button
                   type="button"
@@ -190,11 +229,9 @@ export default function Register() {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full py-3 rounded-lg font-semibold text-white transition ${
-                loading ? 'bg-gray-400 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'
-              }`}
+              className="w-full py-3 rounded-lg font-semibold text-white bg-purple-600 hover:bg-purple-700 transition disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
-              {loading ? 'Registering...' : 'Create Account'}
+              Create Account
             </button>
           </form>
 
