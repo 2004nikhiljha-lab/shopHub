@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import { 
   Users, 
   ShoppingBag, 
@@ -21,9 +21,6 @@ export default function AdminDashboard() {
   const navigate = useNavigate();
   const userInfo = useSelector((state) => state.user.userInfo);
 
-  // Base API URL from environment variable
-  const API_URL = process.env.REACT_APP_API_URL;
-
   useEffect(() => {
     if (!userInfo?.token || !userInfo?.isAdmin) {
       navigate("/");
@@ -33,12 +30,8 @@ export default function AdminDashboard() {
     const fetchStats = async () => {
       try {
         setLoading(true);
-        const { data } = await axios.get(
-          `${API_URL}/api/admin/stats`,
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
+        // ✅ Use the API instance - it already has baseURL and auth configured
+        const { data } = await API.get("/admin/stats");
         setStats(data);
         setError(null);
       } catch (err) {
@@ -50,7 +43,7 @@ export default function AdminDashboard() {
     };
 
     fetchStats();
-  }, [userInfo, navigate, API_URL]);
+  }, [userInfo, navigate]);
 
   if (loading) {
     return (
