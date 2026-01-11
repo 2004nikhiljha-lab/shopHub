@@ -1,11 +1,9 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import { clearCart } from "../redux/slices/cartSlice";
 import { CreditCard, Loader } from "lucide-react";
-
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000/api";
 
 export default function Payment() {
   const navigate = useNavigate();
@@ -72,16 +70,10 @@ export default function Payment() {
           return;
         }
 
-        // Create Razorpay order
-        const { data: orderData } = await axios.post(
-          `${API_URL}/payment/razorpay/create-order`,
-          {
-            amount: total * 100, // Convert to paise
-          },
-          {
-            headers: { Authorization: `Bearer ${userInfo.token}` },
-          }
-        );
+        // ✅ Create Razorpay order using API instance
+        const { data: orderData } = await API.post("/payment/razorpay/create-order", {
+          amount: total * 100, // Convert to paise
+        });
 
         // Razorpay options
         const options = {
@@ -143,13 +135,8 @@ export default function Payment() {
         paymentResult: paymentResult || undefined,
       };
 
-      const { data } = await axios.post(
-        `${API_URL}/orders`,
-        orderData,
-        {
-          headers: { Authorization: `Bearer ${userInfo.token}` },
-        }
-      );
+      // ✅ Create order using API instance
+      const { data } = await API.post("/orders", orderData);
 
       // Clear cart and navigate to success
       dispatch(clearCart());
