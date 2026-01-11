@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
-import axios from "axios";
+import API from "../api"; // ✅ Import the configured API instance
 import formatCurrency from "../utils/formatCurrency";
 import { 
   ArrowLeft, 
@@ -31,14 +31,8 @@ export default function OrderDetails() {
 
       try {
         setLoading(true);
-        const { data } = await axios.get(
-          `http://localhost:5000/api/orders/${id}`,
-          {
-            headers: {
-              Authorization: `Bearer ${userInfo.token}`,
-            },
-          }
-        );
+        // ✅ Use API instance - no need for manual URL or auth headers
+        const { data } = await API.get(`/orders/${id}`);
         setOrder(data);
         setError(null);
       } catch (err) {
@@ -199,7 +193,7 @@ export default function OrderDetails() {
                 <div className="flex-1">
                   <h4 className="font-medium">{item.name}</h4>
                   <p className="text-sm text-gray-600 mt-1">
-                {formatCurrency(item.price)} × {item.qty}
+                    {formatCurrency(item.price)} × {item.qty}
                   </p>
                 </div>
                 <div className="text-right">
@@ -217,7 +211,7 @@ export default function OrderDetails() {
           <div className="max-w-md ml-auto">
             <h3 className="font-semibold text-lg mb-4">Order Summary</h3>
             <div className="space-y-2">
-                <div className="flex justify-between">
+              <div className="flex justify-between">
                 <span className="text-gray-600">Items:</span>
                 <span className="font-medium">{formatCurrency(order.itemsPrice)}</span>
               </div>
