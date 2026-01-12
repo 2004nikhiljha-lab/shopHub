@@ -14,17 +14,17 @@ export default function Home() {
 
   // Hero carousel images
   const heroImages = [
-    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&h=600&fit=crop", // Shopping bags
-    "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&h=600&fit=crop", // Fashion store
-    "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop", // Electronics
-    "https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1920&h=600&fit=crop", // Shopping experience
+    "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1441984904996-e0b6ba687e04?w=1920&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1472851294608-062f824d29cc?w=1920&h=600&fit=crop",
+    "https://images.unsplash.com/photo-1534452203293-494d7ddbf7e0?w=1920&h=600&fit=crop",
   ];
 
   // Rotate hero images
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentImageIndex((prev) => (prev + 1) % heroImages.length);
-    }, 5000); // Change every 5 seconds
+    }, 5000);
 
     return () => clearInterval(interval);
   }, []);
@@ -41,34 +41,35 @@ export default function Home() {
       
       console.log('🔍 Fetching products from:', API.defaults.baseURL + '/products');
       
-      // Fetch products from API
       const { data } = await API.get('/products');
       
       console.log('✅ Products fetched:', data);
       
-      // Check if data is an array
-      if (Array.isArray(data)) {
+      // ✅ FIXED: Check if data exists AND has length
+      if (Array.isArray(data) && data.length > 0) {
         setProducts(data);
-      } else if (data.products && Array.isArray(data.products)) {
-        // Sometimes API returns { products: [...] }
+        console.log('✅ Using API products:', data.length);
+      } else if (data.products && Array.isArray(data.products) && data.products.length > 0) {
         setProducts(data.products);
+        console.log('✅ Using API products from data.products:', data.products.length);
       } else {
-        console.warn('⚠️ Unexpected data format:', data);
+        // API returned empty array - use fallback
+        console.warn('⚠️ API returned empty data, using fallback products');
+        setError('No products found in database. Showing sample products.');
         setProducts(fallbackProducts);
+        console.log('✅ Using fallback products:', fallbackProducts.length);
       }
     } catch (error) {
       console.error('❌ Error fetching products:', error);
       console.error('Error details:', error.response);
-      setError('Failed to load products. Showing sample products.');
-      
-      // Fallback to sample data if API fails
+      setError('Failed to connect to server. Showing sample products.');
       setProducts(fallbackProducts);
     } finally {
       setLoading(false);
     }
   };
 
-  // Fallback sample product data (in case API fails)
+  // Fallback sample product data
   const fallbackProducts = [
     {
       _id: "1",
@@ -236,9 +237,8 @@ export default function Home() {
         `}
       </style>
 
-      {/* Enhanced Hero Section with Animated Background */}
+      {/* Hero Section */}
       <section className="relative h-[600px] overflow-hidden">
-        {/* Background Images Carousel */}
         <div className="absolute inset-0">
           {heroImages.map((image, index) => (
             <div
@@ -257,7 +257,6 @@ export default function Home() {
           ))}
         </div>
 
-        {/* Hero Content */}
         <div className="relative max-w-7xl mx-auto px-4 h-full flex items-center">
           <div className="text-white max-w-2xl">
             <h1 className="text-6xl font-bold mb-4 animate-fade-in">
@@ -280,7 +279,6 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Floating Product Cards Animation */}
           <div className="hidden lg:block absolute right-20 top-1/2 transform -translate-y-1/2">
             <div className="relative w-64 h-80">
               {[1, 2, 3].map((item, index) => (
@@ -303,7 +301,6 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Carousel Indicators */}
         <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {heroImages.map((_, index) => (
             <button
@@ -389,7 +386,7 @@ export default function Home() {
             </div>
           )}
 
-          {/* Loading State - Show Skeleton Loaders */}
+          {/* Loading State */}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
