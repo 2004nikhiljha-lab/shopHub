@@ -206,6 +206,36 @@ export default function Home() {
 
   return (
     <div className="w-full min-h-screen bg-gray-50">
+      <style>
+        {`
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          
+          @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+          }
+          
+          .animate-fade-in {
+            animation: fadeIn 1s ease-out;
+          }
+          
+          .animate-fade-in-delay {
+            animation: fadeIn 1s ease-out 0.3s backwards;
+          }
+          
+          .animate-fade-in-delay-2 {
+            animation: fadeIn 1s ease-out 0.6s backwards;
+          }
+          
+          .animate-float {
+            animation: float 3s ease-in-out infinite;
+          }
+        `}
+      </style>
+
       {/* Enhanced Hero Section with Animated Background */}
       <section className="relative h-[600px] overflow-hidden">
         {/* Background Images Carousel */}
@@ -274,7 +304,7 @@ export default function Home() {
         </div>
 
         {/* Carousel Indicators */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2">
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 z-10">
           {heroImages.map((_, index) => (
             <button
               key={index}
@@ -307,7 +337,7 @@ export default function Home() {
       </section>
 
       {/* Categories */}
-      <section className="py-16">
+      <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="text-3xl font-bold mb-8">Shop by Category</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -389,34 +419,6 @@ export default function Home() {
           )}
         </div>
       </section>
-
-      <style jsx>{`
-        @keyframes fade-in {
-          from { opacity: 0; transform: translateY(20px); }
-          to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-20px); }
-        }
-        
-        .animate-fade-in {
-          animation: fade-in 1s ease-out;
-        }
-        
-        .animate-fade-in-delay {
-          animation: fade-in 1s ease-out 0.3s backwards;
-        }
-        
-        .animate-fade-in-delay-2 {
-          animation: fade-in 1s ease-out 0.6s backwards;
-        }
-        
-        .animate-float {
-          animation: float 3s ease-in-out infinite;
-        }
-      `}</style>
     </div>
   );
 }
