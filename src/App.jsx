@@ -22,6 +22,7 @@ import AdminUsers from "./admin/AdminUsers";
 import Checkout from "./pages/Checkout";
 import Payment from "./pages/Payment";
 import OrderSuccess from "./pages/OrderSucess";
+import HelpBot from "./pages/HelpBot";
 
 function App() {
   return (
@@ -51,6 +52,7 @@ function App() {
         <Route path="/admin/users" element={<AdminUsers />} />
       </Routes>
       <Footer />
+      <HelpBot/>
     </BrowserRouter>
   );
 }
